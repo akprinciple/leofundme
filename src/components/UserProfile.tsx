@@ -1,5 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppKitAccount } from '@reown/appkit/react';
+import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
+import { USER_ABI } from '../abi/users';
+
+const CONTRACT_ADDRESS = import.meta.env.VITE_USERS_CONTRACT_ADDRESS as `0x${string}`;
 
 export default function UserProfile() {
   const { address } = useAppKitAccount();
@@ -7,9 +11,48 @@ export default function UserProfile() {
   // State to hold the form data
   const [addUserData, setAddUserData] = useState({ username: '', name: '', email: '' });
   
-  // Mocking registration state. Once connected to a smart contract, you'll read this 
-  // state from the blockchain (e.g., checking if the user already exists)
+  // 1. Write Hook: Used to send the transaction to the blockchain
+  const { writeContract, data: hash, isPending } = useWriteContract();
+
+  // 2. Wait Hook: Used to track the transaction status on the blockchain
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash, // This hash is returned by useWriteContract once the user signs the transaction
+  });
+
+  
+
+  // const { data: userData } = useReadContract({
+  //   abi: USER_ABI,
+  //   address: CONTRACT_ADDRESS,
+  //   functionName: 'getUser', // Change to match the exact function name in your smart contract
+  //   args: address ? [address] : undefined, // Pass the connected wallet address as an argument
+  // });
+
+  // Separate hook to fetch the contract's owner address
+  const { data: ownerAddress, isLoading: isOwnerLoading, error: ownerError } = useReadContract({
+    abi: USER_ABI,
+    address: CONTRACT_ADDRESS,
+    functionName: 'owner',
+  });
+
   const [isRegistered, setIsRegistered] = useState(false);
+
+  // If the transaction is confirmed, or if we fetch existing user data, set registered to true
+  useEffect(() => {
+    // if (isConfirmed || userData) setIsRegistered(true);
+    
+    // console.log('User Data from Contract:', userData);
+    
+    if (isOwnerLoading) {
+      console.log('Fetching Owner Address...');
+    } else if (ownerError) {
+      console.error('Error fetching Owner Address:', ownerError.message);
+    } else if (ownerAddress !== undefined) {
+      console.log('Owner Address Successfully Fetched:', ownerAddress);
+    }
+  }, [isConfirmed, ownerAddress, isOwnerLoading, ownerError]);
+
+ 
 
   return (
     <div className="bg-gray-800/40 backdrop-blur-sm p-6 md:p-10 rounded-3xl border border-gray-700 shadow-2xl transition-all">
@@ -33,9 +76,10 @@ export default function UserProfile() {
             <input type="email" className="bg-gray-900 border border-gray-700 text-white text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full p-4 transition-colors" placeholder="satoshi@bitcoin.org" value={addUserData.email} onChange={e => setAddUserData({...addUserData, email: e.target.value})} />
           </div>
           <button 
-            onClick={() => setIsRegistered(true)} // TODO: Replace with smart contract write call
-            className="w-full text-white bg-blue-600 hover:bg-blue-500 focus:ring-4 focus:ring-blue-900 font-bold rounded-xl text-lg px-5 py-4 mt-4 transition-all shadow-lg shadow-blue-900/30">
-            Save Details
+            // onClick={handleSaveDetails}
+            disabled={isPending || isConfirming}
+            className="w-full text-white bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 disabled:cursor-not-allowed focus:ring-4 focus:ring-blue-900 font-bold rounded-xl text-lg px-5 py-4 mt-4 transition-all shadow-lg shadow-blue-900/30 flex justify-center items-center">
+            {isPending ? 'Confirm in Wallet...' : isConfirming ? 'Saving to Blockchain...' : 'Save Details'}
           </button>
         </div>
       ) : (

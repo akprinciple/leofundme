@@ -12,7 +12,7 @@ export default function AdminPanel() {
     abi: USER_ABI,
     address: CONTRACT_ADDRESS,
     functionName: 'getAllUsers',
-    args: [0, 50] // Example pagination (offset, limit)
+    args: [0, 10] // Example pagination (offset, limit)
   });
 
   // Mock data for demonstration purposes
