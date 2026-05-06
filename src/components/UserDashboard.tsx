@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useReadContract } from 'wagmi';
+import { parseAbi } from 'viem';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { USER_ABI } from '../abi/users';
 import UserProfile from './UserProfile';
@@ -13,14 +14,14 @@ export default function UserDashboard() {
 
   // Example live read from the contract
   const { data: isPaused } = useReadContract({
-    abi: USER_ABI,
+    abi: parseAbi(USER_ABI as readonly string[]),
     address: CONTRACT_ADDRESS,
     functionName: 'isPaused'
   });
 
   // Read the owner from the contract
   const { data: ownerAddress } = useReadContract({
-    abi: USER_ABI,
+    abi: parseAbi(USER_ABI as readonly string[]),
     address: CONTRACT_ADDRESS,
     functionName: 'owner' // Make sure this matches your smart contract's owner function
   });

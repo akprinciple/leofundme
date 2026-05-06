@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
+import { parseAbi } from 'viem';
 import { USER_ABI } from '../abi/users';
 
-const CONTRACT_ADDRESS = import.meta.env.VITE_USERS_CONTRACT_ADDRESS as `0x${string}`;
+const CONTRACT_ADDRESS = import.meta.env.VITE_USERS_CONTRACT_ADDRESS;
 
 export default function UserProfile() {
   const { address } = useAppKitAccount();
@@ -30,7 +31,7 @@ export default function UserProfile() {
 
   // Separate hook to fetch the contract's owner address
   const { data: ownerAddress, isLoading: isOwnerLoading, error: ownerError } = useReadContract({
-    abi: USER_ABI,
+    abi: parseAbi(USER_ABI as readonly string[]),
     address: CONTRACT_ADDRESS,
     functionName: 'owner',
   });

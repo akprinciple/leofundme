@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useReadContract } from 'wagmi';
+import { parseAbi } from 'viem';
 import { USER_ABI } from '../abi/users';
 
 const CONTRACT_ADDRESS = "0x5d4D1E3e12eF06BC405f854Faf8a38E4D243CCc7";
@@ -9,7 +10,7 @@ export default function AdminPanel() {
 
   // Example live read from the contract
   const { data: usersData, isLoading } = useReadContract({
-    abi: USER_ABI,
+    abi: parseAbi(USER_ABI as readonly string[]),
     address: CONTRACT_ADDRESS,
     functionName: 'getAllUsers',
     args: [0, 10] // Example pagination (offset, limit)

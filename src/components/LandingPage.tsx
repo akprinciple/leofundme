@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useReadContract } from 'wagmi';
+import { parseAbi } from 'viem';
 import { USER_ABI } from '../abi/users';
 
 const CONTRACT_ADDRESS = "0x5d4D1E3e12eF06BC405f854Faf8a38E4D243CCc7";
@@ -12,7 +13,7 @@ export default function LandingPage() {
   // Replace 'getAllUsers' with your actual contract function name.
   // If your contract function expects arguments like (offset, limit), pass them in args.
   const { data: usersData, isLoading } = useReadContract({
-    abi: USER_ABI,
+    abi: parseAbi(USER_ABI as readonly string[]),
     address: CONTRACT_ADDRESS,
     functionName: 'getAllUsers', // TODO: Update this if the function name is different
     args: [offset, itemsPerPage] // TODO: Remove or modify if the contract function doesn't take these args
