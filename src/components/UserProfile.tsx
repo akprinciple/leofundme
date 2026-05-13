@@ -1,57 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
-import { parseAbi } from 'viem';
-import { USER_ABI } from '../abi/users';
 
-const CONTRACT_ADDRESS = import.meta.env.VITE_USERS_CONTRACT_ADDRESS;
+import readContract from '../hooks/useReadContract';
+
+
 
 export default function UserProfile() {
   const { address } = useAppKitAccount();
+  const { ownerAddress, isPaused } = readContract(); // Custom hook to read contract data (owner address and paused status)
   
-  // State to hold the form data
   const [addUserData, setAddUserData] = useState({ username: '', name: '', email: '' });
   
-  // 1. Write Hook: Used to send the transaction to the blockchain
   const { writeContract, data: hash, isPending } = useWriteContract();
 
-  // 2. Wait Hook: Used to track the transaction status on the blockchain
+  
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash, // This hash is returned by useWriteContract once the user signs the transaction
   });
 
   
 
-  // const { data: userData } = useReadContract({
-  //   abi: USER_ABI,
-  //   address: CONTRACT_ADDRESS,
-  //   functionName: 'getUser', // Change to match the exact function name in your smart contract
-  //   args: address ? [address] : undefined, // Pass the connected wallet address as an argument
-  // });
-
-  // Separate hook to fetch the contract's owner address
-  const { data: ownerAddress, isLoading: isOwnerLoading, error: ownerError } = useReadContract({
-    abi: parseAbi(USER_ABI as readonly string[]),
-    address: CONTRACT_ADDRESS,
-    functionName: 'owner',
-  });
-
   const [isRegistered, setIsRegistered] = useState(false);
 
   // If the transaction is confirmed, or if we fetch existing user data, set registered to true
   useEffect(() => {
-    // if (isConfirmed || userData) setIsRegistered(true);
     
-    // console.log('User Data from Contract:', userData);
-    
-    if (isOwnerLoading) {
-      console.log('Fetching Owner Address...');
-    } else if (ownerError) {
-      console.error('Error fetching Owner Address:', ownerError.message);
-    } else if (ownerAddress !== undefined) {
-      console.log('Owner Address Successfully Fetched:', ownerAddress);
-    }
-  }, [isConfirmed, ownerAddress, isOwnerLoading, ownerError]);
+  }, []);
 
  
 
@@ -60,7 +35,7 @@ export default function UserProfile() {
       <h2 className="text-2xl font-bold mb-6 text-white flex items-center">
         <span className="bg-blue-600 w-2 h-6 rounded-full mr-3"></span> My Profile
       </h2>
-
+    {ownerAddress as string}
       {!isRegistered ? (
         <div className="space-y-5 max-w-lg">
           <p className="text-gray-400 text-sm mb-6">You haven't set up your profile yet. Please add your details below.</p>
