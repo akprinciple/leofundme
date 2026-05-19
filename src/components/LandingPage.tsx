@@ -1,24 +1,21 @@
 import { useState } from 'react';
-import { useReadContract } from 'wagmi';
-import { parseAbi } from 'viem';
-import { USER_ABI } from '../abi/users';
+import readContract from '../hooks/useReadContract';
 
-const CONTRACT_ADDRESS = "0x5d4D1E3e12eF06BC405f854Faf8a38E4D243CCc7";
 
 export default function LandingPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
   const offset = (currentPage - 1) * itemsPerPage;
 
-  // Replace 'getAllUsers' with your actual contract function name.
-  // If your contract function expects arguments like (offset, limit), pass them in args.
-  const { data: usersData, isLoading } = useReadContract({
-    abi: parseAbi(USER_ABI as readonly string[]),
-    address: CONTRACT_ADDRESS,
-    functionName: 'getAllUsers', // TODO: Update this if the function name is different
-    args: [offset, itemsPerPage] // TODO: Remove or modify if the contract function doesn't take these args
-  });
-
+  const {isLoading, activeUsers} = readContract(); // Custom hook to read contract data (owner address and paused status)
+  // const { data: usersData, isLoading } = useReadContract({
+  //   abi: parseAbi(USER_ABI as readonly string[]),
+  //   address: CONTRACT_ADDRESS,
+  //   functionName: 'getAllUsers', // TODO: Update this if the function name is different
+  //   args: [offset, itemsPerPage] // TODO: Remove or modify if the contract function doesn't take these args
+  // });
+  
+  
   // Mock data for demonstration purposes, useful while connecting to the smart contract
   const mockUsers = [
     { id: 1, username: 'satoshi', name: 'Satoshi Nakamoto', status: 'Active' },
@@ -32,7 +29,7 @@ export default function LandingPage() {
   ];
 
   // Fallback to mock data if the contract call has not returned array items
-  const displayedUsers = (usersData as any[]) || mockUsers;
+  const displayedUsers = (activeUsers as any[]) || mockUsers;
 
   return (
     <div className="p-6 md:p-10 font-sans max-w-7xl mx-auto">

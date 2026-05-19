@@ -14,8 +14,8 @@ const projectId = 'b2ed0618c2957378a2b5809677587e8d'
 
 // 2. Create a metadata object - optional
 const metadata = {
-  name: 'AppKit',
-  description: 'AppKit Example',
+  name: 'LEOFUNDME',
+  description: 'LEO FUND ME - A Web3 Crowdfunding Platform',
   url: 'https://example.com', // origin must match your domain & subdomain
   icons: ['https://avatars.githubusercontent.com/u/179229932']
 }
