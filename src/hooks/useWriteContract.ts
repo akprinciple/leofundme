@@ -15,15 +15,12 @@ export default function writeContract() {
 
   const addUserDetails = async (username: string, name: string, email: string) => {
     try {
-      const tx = await wagmiWriteContractAsync({
+       await wagmiWriteContractAsync({
           abi: ABI,
           address: CONTRACT_ADDRESS as `0x${string}`,
           functionName: "addUser",
           args: [username, name, email],
         });
-        if(tx) {
-          toast.success("Registration Successful!");
-        }
         
     } catch (error) {
       console.error("Transaction Error:", error);
@@ -42,9 +39,22 @@ export default function writeContract() {
         errorMessage = (error as any)?.shortMessage || error.message;
       }
 
-      toast.error(errorMessage);
+      console.log(errorMessage);
     }
   };
+  const deleteUser = async (username: string) => {
+    try {
+      const tx = await wagmiWriteContractAsync({
+          abi: ABI,
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          functionName: "deleteUser",
+          args: [username],
+        });
+    } catch (error) {
+      console.error("Transaction Error:", error);
+    }
+  };
+  
 
-  return { addUserDetails, ...rest };
+  return { addUserDetails, deleteUser, ...rest };
 }

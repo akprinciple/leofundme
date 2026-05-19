@@ -5,13 +5,14 @@ import { useAppKitAccount } from '@reown/appkit/react';
 import { USER_ABI } from '../abi/users';
 import UserProfile from './UserProfile';
 import AdminPanel from './AdminPanel';
+import readContract from '../hooks/useReadContract';
 
 const CONTRACT_ADDRESS = "0x5d4D1E3e12eF06BC405f854Faf8a38E4D243CCc7";
 
 export default function UserDashboard() {
   const { address } = useAppKitAccount();
   const [activeTab, setActiveTab] = useState<'profile' | 'admin'>('profile');
-
+  const {ownerAddress} = readContract();
   // Example live read from the contract
   const { data: isPaused } = useReadContract({
     abi: parseAbi(USER_ABI as readonly string[]),
@@ -19,18 +20,7 @@ export default function UserDashboard() {
     functionName: 'isPaused'
   });
 
-  // Read the owner from the contract
-  const { data: ownerAddress } = useReadContract({
-    abi: parseAbi(USER_ABI as readonly string[]),
-    address: CONTRACT_ADDRESS,
-    functionName: 'owner' // Make sure this matches your smart contract's owner function
-  });
-
-  // Check if the current connected wallet is the owner of the contract
-  // Fallback to `true` locally if `ownerAddress` is empty so you can test it directly!
-  const isAdmin = ownerAddress && address 
-    ? (ownerAddress as string).toLowerCase() === address.toLowerCase() 
-    : true; // TODO: change to `false` when connected to your live contract
+  const isAdmin = ownerAddress ? address?.toLowerCase() === (ownerAddress as string).toLowerCase() : false;
 
   return (
     <div className="p-6 md:p-10 font-sans max-w-7xl mx-auto">

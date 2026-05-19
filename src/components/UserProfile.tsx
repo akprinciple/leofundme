@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits } from 'viem';
+import { toast } from 'react-toastify/unstyled';
 
 import readContract from '../hooks/useReadContract';
 import writeContract from '../hooks/useWriteContract';
@@ -26,13 +27,23 @@ export default function UserProfile() {
 
   const [isRegistered, setIsRegistered] = useState(false);
   useEffect(() => {
-    console.log("Fetched user info from contract:", userInfo);
-    if (userName != '') {
+    if (isConfirmed) {
+      toast.success("Registration Confirmed!");
       setIsRegistered(true);
+    } else if (userName) {
+      setIsRegistered(true);
+    } else {
+      setIsRegistered(false);
     }
-  }, [userName]);
-  // If the transaction is confirmed, or if we fetch existing user data, set registered to true
-  
+  }, [userName, isConfirmed]);
+
+  // Optimistic UI bindings to display immediately upon confirmation without needing a refresh
+  const displayUserName = userName || (isConfirmed ? addUserData.username : '');
+  const displayEmail = (userInfo as any)?.[0] || (isConfirmed ? addUserData.email : 'N/A');
+  const displayBalance = (userInfo as any)?.[1] != null 
+    ? formatUnits(BigInt((userInfo as any)[1]), 6) 
+    : (isConfirmed ? '0' : 'N/A');
+  const isActive = userInfo && (userInfo as any)?.[2]  ? true : false;
 
  
 
@@ -43,8 +54,8 @@ export default function UserProfile() {
       
 
       </h2>
-      {!isRegistered ? (
-        <div className="space-y-5 max-w-lg">
+      {isRegistered === false ? (
+        <div className="space-y-5 w-full">
           <p className="text-gray-400 text-sm mb-6">You haven't set up your profile yet. Please add your details below.</p>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-400">Username</label>
@@ -70,23 +81,23 @@ export default function UserProfile() {
           <div className="flex items-center space-x-6 mb-8">
             <div className="w-20 h-20 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-blue-900/20">
               
-              {typeof userName === 'string' && userName ? userName.charAt(0).toUpperCase() : 'Unknown'}
+              {typeof displayUserName === 'string' && displayUserName ? displayUserName.charAt(0).toUpperCase() : 'Unknown'}
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-white uppercase">{userName as string}</h3>
-              <p className="text-gray-400 text-lg">@{userName as string}</p>
+              <h3 className="text-2xl font-bold text-white uppercase">{displayUserName as string}</h3>
+              <p className="text-gray-400 text-lg">@{displayUserName as string}</p>
             </div>
           </div>
           
           <div className="space-y-4">
             <div className="flex justify-between border-b border-gray-800 pb-3">
               <span className="text-gray-500 font-medium">Email</span>
-              <span className="text-gray-200">{(userInfo as any)?.[0] || 'N/A'}</span>
+              <span className="text-gray-200">{displayEmail}</span>
             </div>
             
             <div className="flex justify-between border-b border-gray-800 pb-3">
               <span className="text-gray-500 font-medium">Balance</span>
-              <span className="text-gray-200">{(userInfo as any)?.[1] != null ? formatUnits(BigInt((userInfo as any)[1]), 6) : 'N/A'} USDC</span>
+              <span className="text-gray-200">{displayBalance} USDC</span>
             </div>
             
             <div className="flex justify-between border-b border-gray-800 pb-3">
@@ -97,7 +108,7 @@ export default function UserProfile() {
             </div>
             <div className="flex justify-between pb-2 items-center">
               <span className="text-gray-500 font-medium">Status</span>
-              {userInfo && (userInfo as any)?.[2]  === true ? (
+              {isActive ? (
                 <span className="px-3 py-1 text-xs font-bold rounded-full bg-green-900/50 text-green-400 border border-green-800 uppercase tracking-wider">Active</span>
               ) : <span className="px-3 py-1 text-xs font-bold rounded-full bg-red-900/50 text-red-400 border border-red-800 uppercase tracking-wider">Inactive</span>}
             </div>

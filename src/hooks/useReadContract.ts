@@ -41,6 +41,13 @@ export default function readContract() {
       functionName: 'getUserByUsername', 
       args: [userName] 
     });
+    const { data: allUsers } = useReadContract({
+    abi: parseAbi(USER_ABI as readonly string[]),
+    address: CONTRACT_ADDRESS,
+    functionName: 'getAllUsers',
+    args: [0, 10] // Example pagination (offset, limit)
+  });
 
-  return { ownerAddress, isPaused, usersData, isLoading, activeUsers, userName, userInfo };
+  return { ownerAddress, isPaused, usersData, isLoading, activeUsers, userName, 
+    userInfo, allUsers };
 }

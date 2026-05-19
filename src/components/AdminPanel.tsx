@@ -1,30 +1,14 @@
 import { useState } from 'react';
-import { useReadContract } from 'wagmi';
-import { parseAbi } from 'viem';
-import { USER_ABI } from '../abi/users';
-
-const CONTRACT_ADDRESS = "0x5d4D1E3e12eF06BC405f854Faf8a38E4D243CCc7";
+import writeContract from '../hooks/useWriteContract';
+import readContract from '../hooks/useReadContract';
 
 export default function AdminPanel() {
   const [manageUsername, setManageUsername] = useState('');
+  const { deleteUser } = writeContract();
+  const {usersData } = readContract()
+  
 
-  // Example live read from the contract
-  const { data: usersData, isLoading } = useReadContract({
-    abi: parseAbi(USER_ABI as readonly string[]),
-    address: CONTRACT_ADDRESS,
-    functionName: 'getAllUsers',
-    args: [0, 10] // Example pagination (offset, limit)
-  });
-
-  // Mock data for demonstration purposes
-  const mockUsers = [
-    { id: 1, username: 'satoshi', name: 'Satoshi Nakamoto', status: 'Active', email: 'satoshi@btc.com' },
-    { id: 2, username: 'vitalik', name: 'Vitalik Buterin', status: 'Active', email: 'vitalik@eth.org' },
-    { id: 3, username: 'gavin', name: 'Gavin Wood', status: 'Inactive', email: 'gavin@dot.org' },
-    { id: 4, username: 'charles', name: 'Charles Hoskinson', status: 'Active', email: 'charles@ada.io' },
-  ];
-
-  const displayedUsers = (usersData as any[]) || mockUsers;
+  const displayedUsers = (usersData as any[]);
 
   return (
     <div className="space-y-8">
@@ -64,24 +48,30 @@ export default function AdminPanel() {
                 <th scope="col" className="px-6 py-4">ID</th>
                 <th scope="col" className="px-6 py-4">Name</th>
                 <th scope="col" className="px-6 py-4">Username</th>
-                <th scope="col" className="px-6 py-4">Status</th>
                 <th scope="col" className="px-6 py-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {displayedUsers.map((user: any, idx: number) => (
+
                 <tr key={user.id || idx} className="border-b border-gray-800 bg-gray-900/30 hover:bg-gray-800/60 transition-colors">
-                  <td className="px-6 py-4 font-medium text-gray-500">#{user.id || idx + 1}</td>
-                  <td className="px-6 py-4 font-bold text-white">{user.name}</td>
-                  <td className="px-6 py-4">@{user.username}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider ${user.status === 'Active' ? 'bg-green-900/50 text-green-400 border border-green-800' : 'bg-red-900/50 text-red-400 border border-red-800'}`}>
-                      {user.status || 'Unknown'}
-                    </span>
-                  </td>
+                  <td className="px-6 py-4 font-medium text-gray-500">#{idx + 1}</td>
+                  <td className="px-6 py-4 font-bold text-white uppercase">{user}</td>
+                  <td className="px-6 py-4">@{user}</td>
+                 
+                  
                   <td className="px-6 py-4 text-center">
-                    <button onClick={() => setManageUsername(user.username)} className="px-4 py-2 bg-blue-900/30 text-blue-400 border border-blue-800 rounded-lg hover:bg-blue-900/50 font-medium transition-colors">
-                      Manage
+                    <button type='button' onClick={() => setManageUsername(user.username)} className="px-4 py-2 bg-blue-900/30 text-blue-400 border border-blue-800 rounded-lg hover:bg-blue-900/50 font-medium transition-colors cursor-pointer">
+                      View
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to delete this user? This action is not reversible.")) {
+                         deleteUser(user);
+                        }
+                      }} 
+                      className="px-4 py-2 mx-1 bg-red-900/30 text-red-400 border border-red-800 rounded-lg hover:bg-red-900/50 font-medium transition-colors cursor-pointer">
+                      Delete
                     </button>
                   </td>
                 </tr>
