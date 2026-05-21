@@ -5,7 +5,7 @@ import { useAppKitAccount } from '@reown/appkit/react';
 
 const ABI = parseAbi(USER_ABI as readonly string[]);
 const CONTRACT_ADDRESS = import.meta.env.VITE_USERS_CONTRACT_ADDRESS;
-export default function readContract() {
+export default function readContract(targetUsername?: string) {
   const { address } = useAppKitAccount();
  const { data: ownerAddress } = useReadContract({
     abi: ABI,
@@ -47,7 +47,16 @@ export default function readContract() {
     functionName: 'getAllUsers',
     args: [0, 10] // Example pagination (offset, limit)
   });
+  const{data: oneUser} = useReadContract({
+    abi: ABI,
+    address: CONTRACT_ADDRESS,
+    functionName: 'getUserByUsername',
+    args: targetUsername ? [targetUsername] : undefined,
+    query: {
+      enabled: !!targetUsername
+    }
+  });
 
   return { ownerAddress, isPaused, usersData, isLoading, activeUsers, userName, 
-    userInfo, allUsers };
+    userInfo, allUsers, oneUser };
 }

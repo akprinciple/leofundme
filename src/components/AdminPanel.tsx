@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import writeContract from '../hooks/useWriteContract';
 import readContract from '../hooks/useReadContract';
 
 export default function AdminPanel() {
   const [manageUsername, setManageUsername] = useState('');
+  const navigate = useNavigate();
   const { deleteUser } = writeContract();
   const {usersData } = readContract()
   
@@ -11,7 +13,26 @@ export default function AdminPanel() {
   const displayedUsers = (usersData as any[]);
 
   return (
-    <div className="space-y-8">
+    <div className="p-6 md:p-10 font-sans max-w-7xl mx-auto">
+      {/* Dashboard Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b border-gray-800">
+        <div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">Admin Dashboard</h1>
+          <p className="text-gray-400 mt-2 text-sm">Manage platform users and settings</p>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="flex space-x-4 mb-8">
+        <Link to="/dashboard" className="px-6 py-3 rounded-xl font-bold transition-all bg-gray-800/50 text-gray-400 hover:bg-gray-800 hover:text-white">
+          My Profile
+        </Link>
+        <Link to="/admin" className="px-6 py-3 rounded-xl font-bold transition-all flex items-center bg-purple-600 text-white shadow-lg shadow-purple-900/30">
+          Admin Panel
+        </Link>
+      </div>
+
+      <div className="space-y-8">
       {/* MANAGE USER STATUS */}
       <div className="bg-gray-800/40 backdrop-blur-sm p-6 rounded-3xl border border-gray-700 shadow-xl transition-all hover:border-gray-600">
         <h2 className="text-xl font-bold mb-6 text-white flex items-center">
@@ -22,17 +43,13 @@ export default function AdminPanel() {
             <label className="block mb-2 text-sm font-medium text-gray-400">Target Username</label>
             <input type="text" className="bg-gray-900 border border-gray-700 text-white text-sm rounded-xl focus:ring-yellow-500 focus:border-yellow-500 block w-full p-4 transition-colors" placeholder="Enter username..." value={manageUsername} onChange={e => setManageUsername(e.target.value)} />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-            <button className="text-green-400 bg-green-900/30 border border-green-800 hover:bg-green-900/50 focus:ring-4 focus:ring-green-900 font-bold rounded-xl text-sm px-4 py-3 transition-colors shadow-lg">
-              Make Active
-            </button>
-            <button className="text-yellow-400 bg-yellow-900/30 border border-yellow-800 hover:bg-yellow-900/50 focus:ring-4 focus:ring-yellow-900 font-bold rounded-xl text-sm px-4 py-3 transition-colors shadow-lg">
-              Make Inactive
-            </button>
-            <button className="text-red-400 bg-red-900/30 border border-red-800 hover:bg-red-900/50 hover:text-red-300 focus:ring-4 focus:ring-red-900 font-bold rounded-xl text-sm px-4 py-3 transition-colors shadow-lg">
-              Delete User
-            </button>
-          </div>
+          <div className="mt-4">
+             <button 
+                onClick={() => manageUsername && navigate(`/admin/user/${manageUsername}`)}
+                className="text-blue-400 bg-blue-900/30 border border-blue-800 hover:bg-blue-900/50 focus:ring-4 focus:ring-blue-900 font-bold rounded-xl text-sm px-6 py-3 transition-colors shadow-lg">
+                Manage Selected User
+             </button>
+           </div>
         </div>
       </div>
 
@@ -56,18 +73,18 @@ export default function AdminPanel() {
 
                 <tr key={user.id || idx} className="border-b border-gray-800 bg-gray-900/30 hover:bg-gray-800/60 transition-colors">
                   <td className="px-6 py-4 font-medium text-gray-500">#{idx + 1}</td>
-                  <td className="px-6 py-4 font-bold text-white uppercase">{user}</td>
-                  <td className="px-6 py-4">@{user}</td>
+                  <td className="px-6 py-4 font-bold text-white uppercase">{user.name || user}</td>
+                  <td className="px-6 py-4">@{user.username || user}</td>
                  
                   
                   <td className="px-6 py-4 text-center">
-                    <button type='button' onClick={() => setManageUsername(user.username)} className="px-4 py-2 bg-blue-900/30 text-blue-400 border border-blue-800 rounded-lg hover:bg-blue-900/50 font-medium transition-colors cursor-pointer">
+                    <button type='button' onClick={() => navigate(`/admin/user/${user.username || user}`)} className="px-4 py-2 bg-blue-900/30 text-blue-400 border border-blue-800 rounded-lg hover:bg-blue-900/50 font-medium transition-colors cursor-pointer">
                       View
                     </button>
                     <button 
                       onClick={() => {
                         if (window.confirm("Are you sure you want to delete this user? This action is not reversible.")) {
-                         deleteUser(user);
+                         deleteUser(user.username || user);
                         }
                       }} 
                       className="px-4 py-2 mx-1 bg-red-900/30 text-red-400 border border-red-800 rounded-lg hover:bg-red-900/50 font-medium transition-colors cursor-pointer">
@@ -79,6 +96,7 @@ export default function AdminPanel() {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
   );

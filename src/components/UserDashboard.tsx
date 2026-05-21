@@ -1,17 +1,15 @@
-import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useReadContract } from 'wagmi';
 import { parseAbi } from 'viem';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { USER_ABI } from '../abi/users';
 import UserProfile from './UserProfile';
-import AdminPanel from './AdminPanel';
 import readContract from '../hooks/useReadContract';
 
 const CONTRACT_ADDRESS = "0x5d4D1E3e12eF06BC405f854Faf8a38E4D243CCc7";
 
 export default function UserDashboard() {
   const { address } = useAppKitAccount();
-  const [activeTab, setActiveTab] = useState<'profile' | 'admin'>('profile');
   const {ownerAddress} = readContract();
   // Example live read from the contract
   const { data: isPaused } = useReadContract({
@@ -42,26 +40,25 @@ export default function UserDashboard() {
 
       {/* Navigation Tabs */}
       <div className="flex space-x-4 mb-8">
-        <button
-          onClick={() => setActiveTab('profile')}
-          className={`px-6 py-3 rounded-xl font-bold transition-all ${activeTab === 'profile' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30' : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+        <Link
+          to="/dashboard"
+          className="px-6 py-3 rounded-xl font-bold transition-all bg-blue-600 text-white shadow-lg shadow-blue-900/30"
         >
           My Profile
-        </button>
+        </Link>
         {isAdmin && (
-          <button
-            onClick={() => setActiveTab('admin')}
-            className={`px-6 py-3 rounded-xl font-bold transition-all flex items-center ${activeTab === 'admin' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/30' : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800 hover:text-white'}`}
+          <Link
+            to="/admin"
+            className="px-6 py-3 rounded-xl font-bold transition-all flex items-center bg-gray-800/50 text-gray-400 hover:bg-gray-800 hover:text-white"
           >
             Admin Panel
-          </button>
+          </Link>
         )}
       </div>
 
       {/* Active Tab Content Area */}
       <div className="mt-6">
-        {activeTab === 'profile' && <UserProfile />}
-        {activeTab === 'admin' && isAdmin && <AdminPanel />}
+        <UserProfile />
       </div>
     </div>
   );
