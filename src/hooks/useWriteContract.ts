@@ -54,7 +54,44 @@ export default function writeContract() {
       console.error("Transaction Error:", error);
     }
   };
-  
+  const makeActive = async (username: string) => {
+    try {      const tx = await wagmiWriteContractAsync({
+          abi: ABI,
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          functionName: "makeActive",
+          args: [username],
+        });
+        toast.success(`User "${username}" is now Active!`);
+    } catch (err) {
+      console.log("Transaction Error:", err);
+    }
+  };
+  const makeInactive = async (username: string) => {
+    try {
+      const tx = await wagmiWriteContractAsync({
+          abi: ABI,
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          functionName: "makeInactive",
+          args: [username],
+        });
+        toast.success(`User "${username}" is now Inactive!`);
+    } catch (err) {
+      console.log("Transaction Error:", err);
+    }
 
-  return { addUserDetails, deleteUser, ...rest };
+  };
+  const pause = async () => {
+    try {
+      const tx = await wagmiWriteContractAsync({
+          abi: ABI,
+          address: CONTRACT_ADDRESS as `0x${string}`,
+          functionName: "pause",
+        });
+        toast.success(`Withdrawal is now Paused!`);
+    } catch (err) {
+      console.log("Transaction Error:", err);
+    }
+  };
+
+  return { addUserDetails, deleteUser, makeActive, makeInactive, ...rest, pause };
 }

@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import writeContract from '../hooks/useWriteContract';
 import readContract from '../hooks/useReadContract';
+import WithdrawalControl from './withdrawalControl';
 
 export default function AdminPanel() {
   const [manageUsername, setManageUsername] = useState('');
   const navigate = useNavigate();
   const { deleteUser } = writeContract();
-  const {usersData } = readContract()
+  const {usersData } = readContract();
   
 
-  const displayedUsers = (usersData as any[]);
+  const displayedUsers = (usersData as any[]) || [];
 
   return (
     <div className="p-6 md:p-10 font-sans max-w-7xl mx-auto">
@@ -33,6 +34,10 @@ export default function AdminPanel() {
       </div>
 
       <div className="space-y-8">
+      {/* SYSTEM CONTROLS */}
+      <WithdrawalControl />
+
+
       {/* MANAGE USER STATUS */}
       <div className="bg-gray-800/40 backdrop-blur-sm p-6 rounded-3xl border border-gray-700 shadow-xl transition-all hover:border-gray-600">
         <h2 className="text-xl font-bold mb-6 text-white flex items-center">
@@ -47,7 +52,7 @@ export default function AdminPanel() {
              <button 
                 onClick={() => manageUsername && navigate(`/admin/user/${manageUsername}`)}
                 className="text-blue-400 bg-blue-900/30 border border-blue-800 hover:bg-blue-900/50 focus:ring-4 focus:ring-blue-900 font-bold rounded-xl text-sm px-6 py-3 transition-colors shadow-lg">
-                Manage Selected User
+               Search by Username
              </button>
            </div>
         </div>

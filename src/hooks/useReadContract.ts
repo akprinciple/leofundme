@@ -12,7 +12,7 @@ export default function readContract(targetUsername?: string) {
     address: CONTRACT_ADDRESS,
     functionName: 'owner',
   });
-  const { data: isPaused } = useReadContract({
+  const { data: isPaused, refetch: refetchPaused } = useReadContract({
     abi: ABI,
     address: CONTRACT_ADDRESS,
     functionName: 'isPaused'
@@ -56,7 +56,9 @@ export default function readContract(targetUsername?: string) {
       enabled: !!targetUsername
     }
   });
+ 
+
 
   return { ownerAddress, isPaused, usersData, isLoading, activeUsers, userName, 
-    userInfo, allUsers, oneUser };
+    userInfo, allUsers, oneUser, refetchPaused};
 }

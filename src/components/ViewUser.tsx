@@ -3,21 +3,29 @@ import { useState, useEffect } from 'react';
 import readContract from '../hooks/useReadContract';
 import writeContract from '../hooks/useWriteContract';
 import { formatUnits } from 'viem';
+import { toast } from 'react-toastify';
+import { useWaitForTransactionReceipt } from 'wagmi';
 
 export default function ViewUser() {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
   // Pass the extracted username into the hook to trigger the 'oneUser' read
   const { oneUser} = readContract(username);
-  const { deleteUser } = writeContract();
+  const { deleteUser, makeActive, makeInactive, data: hash, isPending } = writeContract();
   // If toggleUserStatus exists in your writeContract hook, cast or add it to the interface
   const { toggleUserStatus } = writeContract() as any; 
 
   const [user, setUser] = useState<any | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<'Active' | 'Inactive' | null>(null);
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   useEffect(() => {
     if((oneUser as any)?.[0]?.length === 0) {
       setUser('0');
+      toast.error(`User "${username}" not found.`);
       return;
     }
     if (oneUser && username) {
@@ -30,6 +38,15 @@ export default function ViewUser() {
       });
     }
   }, [oneUser, username]);
+  console.log("Fetched user data:", user?.username);
+
+  useEffect(() => {
+    if (isConfirmed && pendingStatus) {
+      setUser((prev: any) => prev ? { ...prev, status: pendingStatus } : prev);
+      toast.success(`User status updated to ${pendingStatus}!`);
+      setPendingStatus(null);
+    }
+  }, [isConfirmed, pendingStatus]);
 
   if (!user) {
     return (
@@ -72,11 +89,11 @@ export default function ViewUser() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-6 border-b border-gray-700">
           <div className="flex items-center space-x-5 mb-4 md:mb-0">
             <div className="w-20 h-20 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-blue-900/20">
-              {(user.username || 'U').charAt(0).toUpperCase()}
+              {(username || 'U').charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold text-white">{user.name || 'Unknown'}</h1>
-              <p className="text-gray-400 text-lg">@{user.username || 'unknown'}</p>
+              <h1 className="text-3xl font-extrabold text-white capitalize">{username || ''}</h1>
+              <p className="text-gray-400 text-lg">@{username || ''}</p>
             </div>
           </div>
           <div className="flex flex-col items-end">
@@ -109,15 +126,22 @@ export default function ViewUser() {
                 type="checkbox" 
                 title='User Status'
                 className="sr-only peer"
-                checked={user.status === 'Active'}
+                checked={user.status === "Active"}
+                disabled={isPending || isConfirming}
                 onChange={() => {
-                  const isActive = user.status === 'Active';
-                  if (toggleUserStatus) toggleUserStatus(user.username, !isActive);
-                  // Optimistic update for UI
-                  setUser({...user, status: isActive ? 'Inactive' : 'Active'});
+                  if (user.status === "Active") {
+                    makeInactive(user.username);
+                    setPendingStatus('Inactive');
+                    toast.info(`Deactivating @${username}...`);
+                  }else{
+                    makeActive(user.username);
+                    setPendingStatus('Active');
+                    toast.info(`Activating @${username}...`);
+                  }
+                  
                 }} 
               />
-              <div className="w-14 h-7 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+              <div className="w-14 h-7 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800/50 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
             </label>
           </div>
           

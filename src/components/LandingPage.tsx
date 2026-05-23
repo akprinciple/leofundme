@@ -29,7 +29,7 @@ export default function LandingPage() {
   ];
 
   // Fallback to mock data if the contract call has not returned array items
-  const displayedUsers = (activeUsers as any[]) || mockUsers;
+  const displayedUsers = (activeUsers as any[]) || [];
 
   return (
     <div className="p-6 md:p-10 font-sans max-w-7xl mx-auto">
@@ -66,12 +66,12 @@ export default function LandingPage() {
             <div key={user.id || index} className="bg-gray-800/40 backdrop-blur-sm p-6 rounded-2xl border border-gray-700 shadow-xl transition-all hover:border-gray-500 flex flex-col items-center text-center hover:-translate-y-1">
               {/* User Avatar / Logo Generator */}
               <div className="w-20 h-20 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-blue-900/20 mb-4">
-                {user.username ? user.username.charAt(0).toUpperCase() : '?'}
+                {user ? user.charAt(0).toUpperCase() : '?'}
               </div>
-              <h3 className="text-lg font-bold text-white mb-1">{user.name || 'Unknown Name'}</h3>
-              <p className="text-gray-400 text-sm mb-4">@{user.username || 'unknown'}</p>
+              <h3 className="text-lg font-bold text-white mb-1">{user || ''}</h3>
+              <p className="text-gray-400 text-sm mb-4">@{user || ''}</p>
               <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider ${user.status === 'Active' ? 'bg-green-900/50 text-green-400 border border-green-800' : 'bg-red-900/50 text-red-400 border border-red-800'}`}>
-                {user.status || 'Unknown'}
+                Active
               </span>
             </div>
           ))}

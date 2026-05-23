@@ -1,5 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import ConnectButtonWithHooks from '../config/ConnectButtonWithHooks';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Layout() {
   return (
@@ -22,6 +24,7 @@ export default function Layout() {
       <main>
         <Outlet />
       </main>
+      <ToastContainer theme="dark" position="bottom-right" />
     </div>
   );
 }

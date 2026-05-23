@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAppKitAccount } from '@reown/appkit/react';
 import { useWaitForTransactionReceipt } from 'wagmi';
 import { formatUnits } from 'viem';
-import { toast } from 'react-toastify/unstyled';
+import { toast } from 'react-toastify';
 
 import readContract from '../hooks/useReadContract';
 import writeContract from '../hooks/useWriteContract';
